@@ -1,4 +1,5 @@
 const API = window.SHIPHAPPENS_API || 'http://localhost:8080/api/v1';
+document.querySelector('#apiDocs').href = `${API.replace(/\/api\/v1$/, '')}/swagger-ui/index.html`;
 const error = document.querySelector('#error');
 async function get(path) { const res = await fetch(`${API}${path}`); if (!res.ok) { const text=await res.text(); throw new Error(`${res.status}: ${text}`); } return res.json(); }
 function showError(message) { console.error('ShipHappens API error:', message); error.textContent=`API request failed — ${message}`; }
