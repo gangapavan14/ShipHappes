@@ -1,0 +1,3 @@
+package com.shiphappens.logistics.controller;
+import com.shiphappens.logistics.dto.Requests; import com.shiphappens.logistics.entity.Shipment; import com.shiphappens.logistics.service.LogisticsService; import jakarta.validation.Valid; import org.springframework.http.*; import org.springframework.web.bind.annotation.*;
+@RestController @RequestMapping("/api/v1/orders") public class OrderController { private final LogisticsService service; public OrderController(LogisticsService service){this.service=service;} @PostMapping public ResponseEntity<Shipment> create(@Valid @RequestBody Requests.CreateOrder request){return ResponseEntity.status(HttpStatus.CREATED).body(service.createOrder(request,null));} }

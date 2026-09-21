@@ -1,0 +1,1 @@
+package com.shiphappens.logistics.repository; import com.shiphappens.logistics.entity.WebhookDeliveryLog; import org.springframework.data.jpa.repository.JpaRepository; public interface WebhookDeliveryLogRepository extends JpaRepository<WebhookDeliveryLog,Long>{}

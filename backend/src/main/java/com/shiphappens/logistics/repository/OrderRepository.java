@@ -1,0 +1,1 @@
+package com.shiphappens.logistics.repository; import com.shiphappens.logistics.entity.LogisticsOrder; import java.util.*; import org.springframework.data.jpa.repository.JpaRepository; public interface OrderRepository extends JpaRepository<LogisticsOrder,Long>{ Optional<LogisticsOrder> findByExternalReference(String reference); }

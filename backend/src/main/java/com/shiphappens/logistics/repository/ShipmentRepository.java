@@ -1,0 +1,1 @@
+package com.shiphappens.logistics.repository; import com.shiphappens.logistics.entity.*; import java.util.*; import org.springframework.data.jpa.repository.JpaRepository; public interface ShipmentRepository extends JpaRepository<Shipment,Long>{ List<Shipment> findByStatus(Statuses.ShipmentStatus status); long countByStatus(Statuses.ShipmentStatus status); }

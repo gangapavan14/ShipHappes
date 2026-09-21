@@ -1,0 +1,1 @@
+package com.shiphappens.logistics.repository; import com.shiphappens.logistics.entity.Warehouse; import org.springframework.data.jpa.repository.JpaRepository; public interface WarehouseRepository extends JpaRepository<Warehouse,Long>{}

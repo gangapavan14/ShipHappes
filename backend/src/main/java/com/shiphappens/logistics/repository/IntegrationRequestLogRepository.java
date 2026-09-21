@@ -1,0 +1,1 @@
+package com.shiphappens.logistics.repository; import com.shiphappens.logistics.entity.IntegrationRequestLog; import org.springframework.data.jpa.repository.JpaRepository; public interface IntegrationRequestLogRepository extends JpaRepository<IntegrationRequestLog,Long>{}

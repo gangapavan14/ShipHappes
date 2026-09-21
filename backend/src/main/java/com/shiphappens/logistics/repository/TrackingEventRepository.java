@@ -1,0 +1,1 @@
+package com.shiphappens.logistics.repository; import com.shiphappens.logistics.entity.*; import java.util.*; import org.springframework.data.jpa.repository.JpaRepository; public interface TrackingEventRepository extends JpaRepository<TrackingEvent,Long>{ List<TrackingEvent> findByShipmentOrderByCreatedAtAsc(Shipment shipment); }

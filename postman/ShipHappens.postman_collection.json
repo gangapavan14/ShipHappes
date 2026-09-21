@@ -1,0 +1,10 @@
+{
+  "info":{"name":"ShipHappens Logistics API","schema":"https://schema.getpostman.com/json/collection/v2.1.0/collection.json"},
+  "variable":[{"key":"baseUrl","value":"http://localhost:8080"},{"key":"jwtToken","value":""},{"key":"apiKey","value":"change-me-local-integration-key"}],
+  "item":[
+    {"name":"Login","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"email\": \"demo@shiphappens.app\",\n  \"password\": \"{{demoPassword}}\"\n}"},"url":"{{baseUrl}}/api/v1/auth/login"}},
+    {"name":"Shipment Status Summary","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{jwtToken}}"}],"url":"{{baseUrl}}/api/v1/reports/shipments/status-summary"}},
+    {"name":"Submit External Order","request":{"method":"POST","header":[{"key":"X-API-KEY","value":"{{apiKey}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"externalOrderId\": \"EXT-10045\",\n  \"customerCode\": \"CUST-DEMO\",\n  \"pickup\": {\"addressLine1\":\"Warehouse Road\",\"city\":\"Hyderabad\",\"state\":\"Telangana\",\"postalCode\":\"500001\",\"country\":\"India\"},\n  \"delivery\": {\"addressLine1\":\"Electronic City\",\"city\":\"Bengaluru\",\"state\":\"Karnataka\",\"postalCode\":\"560100\",\"country\":\"India\"},\n  \"packages\":[{\"description\":\"Accessories\",\"weightKg\":5.5,\"declaredValue\":12000}]\n}"},"url":"{{baseUrl}}/api/v1/integrations/orders"}},
+    {"name":"Health","request":{"method":"GET","url":"{{baseUrl}}/actuator/health"}}
+  ]
+}

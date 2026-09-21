@@ -1,0 +1,1 @@
+package com.shiphappens.logistics.repository; import com.shiphappens.logistics.entity.Customer; import java.util.*; import org.springframework.data.jpa.repository.JpaRepository; public interface CustomerRepository extends JpaRepository<Customer,Long>{ Optional<Customer> findByCustomerCode(String code); boolean existsByCustomerCode(String code); }
