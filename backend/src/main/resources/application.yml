@@ -5,6 +5,11 @@ spring:
     url: ${DB_URL:jdbc:mysql://localhost:3306/shiphappens}
     username: ${DB_USERNAME:shiphappens}
     password: ${DB_PASSWORD:shiphappens}
+    hikari:
+      # TiDB Cloud Starter can recycle public-endpoint connections; five minutes is
+      # safely below its documented connection lifetime recommendation.
+      max-lifetime: ${DB_MAX_LIFETIME:300000}
+      keepalive-time: ${DB_KEEPALIVE_TIME:0}
   jpa:
     open-in-view: false
     hibernate:
