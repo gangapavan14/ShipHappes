@@ -3,7 +3,7 @@ function resolveApiBaseUrl() {
   const saved = localStorage.getItem('shiphappens_api_url');
   if (saved) return saved.trim().replace(/\/+$/, '');
   if (window.location.hostname.includes('onrender.com')) {
-    return 'https://shiphappens-api.onrender.com/api/v1';
+    return 'https://shiphappens-api-yyru.onrender.com/api/v1';
   }
   if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
     return `${window.location.origin}/api/v1`;
