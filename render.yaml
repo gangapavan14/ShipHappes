@@ -2,6 +2,7 @@ services:
   - type: web
     name: shiphappens-api
     runtime: docker
+    plan: free
     dockerContext: ./backend
     dockerfilePath: ./backend/Dockerfile
     healthCheckPath: /actuator/health
