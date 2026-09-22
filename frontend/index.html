@@ -31,9 +31,9 @@
       </nav>
 
       <div class="header-right">
-        <div class="status-indicator">
-          <span class="pulse-dot"></span>
-          <span class="status-text">NETWORK ACTIVE</span>
+        <div class="status-indicator" id="apiStatusBadge" style="cursor: pointer;" title="Click to view or change Backend API URL">
+          <span class="pulse-dot" id="apiPulseDot"></span>
+          <span class="status-text" id="apiStatusText">ONLINE</span>
         </div>
         <div id="authContainer" class="auth-box">
           <button id="loginBtn" class="btn btn-sm btn-outline">Operator Login</button>

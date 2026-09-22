@@ -1,4 +1,17 @@
-const API = window.SHIPHAPPENS_API || 'http://localhost:8080/api/v1';
+function resolveApiBaseUrl() {
+  if (window.SHIPHAPPENS_API) return window.SHIPHAPPENS_API;
+  const saved = localStorage.getItem('shiphappens_api_url');
+  if (saved) return saved.trim().replace(/\/+$/, '');
+  if (window.location.hostname.includes('onrender.com')) {
+    return 'https://shiphappens-api.onrender.com/api/v1';
+  }
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return `${window.location.origin}/api/v1`;
+  }
+  return 'http://localhost:8080/api/v1';
+}
+
+const API = resolveApiBaseUrl();
 
 // Setup Swagger Docs link
 const docsLink = document.querySelector('#apiDocs');
@@ -447,4 +460,22 @@ setInterval(() => {
   loadDashboard();
   loadShipments();
 }, 8000);
+
+const apiStatusBadge = document.querySelector('#apiStatusBadge');
+if (apiStatusBadge) {
+  apiStatusBadge.addEventListener('click', () => {
+    const next = window.prompt(
+      `Current Backend API URL:\n${API}\n\nEnter custom Backend API Base URL (or leave blank to reset to auto-detect):`,
+      API
+    );
+    if (next !== null) {
+      if (next.trim() === '') {
+        localStorage.removeItem('shiphappens_api_url');
+      } else {
+        localStorage.setItem('shiphappens_api_url', next.trim());
+      }
+      window.location.reload();
+    }
+  });
+}
 
