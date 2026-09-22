@@ -11,7 +11,7 @@ spring:
       max-lifetime: ${DB_MAX_LIFETIME:300000}
       keepalive-time: ${DB_KEEPALIVE_TIME:0}
   jpa:
-    open-in-view: false
+    open-in-view: true
     hibernate:
       ddl-auto: validate
   flyway:

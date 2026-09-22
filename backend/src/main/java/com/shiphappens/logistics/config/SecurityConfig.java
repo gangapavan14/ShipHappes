@@ -1,3 +1,88 @@
 package com.shiphappens.logistics.config;
-import com.shiphappens.logistics.security.*; import org.springframework.beans.factory.annotation.Value; import org.springframework.context.annotation.*; import org.springframework.security.config.annotation.web.builders.HttpSecurity; import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity; import org.springframework.security.config.http.SessionCreationPolicy; import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; import org.springframework.security.crypto.password.PasswordEncoder; import org.springframework.security.web.*; import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter; import org.springframework.web.cors.*; import java.util.List;
-@Configuration @EnableWebSecurity public class SecurityConfig { @Bean SecurityFilterChain security(HttpSecurity http,JwtAuthenticationFilter jwt,IntegrationApiKeyFilter apiKey)throws Exception{return http.csrf(c->c.disable()).cors(c->{}).sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).authorizeHttpRequests(a->a.requestMatchers("/actuator/health","/swagger-ui/**","/v3/api-docs/**","/api/v1/auth/login","/","/index.html","/styles.css","/app.js").permitAll().requestMatchers("/api/v1/integrations/**").permitAll().requestMatchers("/api/v1/dashboard/**","/api/v1/shipments/**").permitAll().requestMatchers("/api/v1/customers/**","/api/v1/warehouses/**","/api/v1/drivers/**","/api/v1/vehicles/**","/api/v1/reports/**","/api/v1/auth/register").hasAnyRole("ADMIN","OPERATIONS").requestMatchers("/api/v1/orders/**","/api/v1/deliveries/**").hasAnyRole("ADMIN","OPERATIONS","CUSTOMER","DRIVER").anyRequest().authenticated()).addFilterBefore(jwt,UsernamePasswordAuthenticationFilter.class).addFilterBefore(apiKey,JwtAuthenticationFilter.class).build();} @Bean PasswordEncoder passwordEncoder(){return new BCryptPasswordEncoder();} @Bean CorsConfigurationSource corsConfigurationSource(@Value("${app.cors.allowed-origin}") String allowedOrigin){CorsConfiguration c=new CorsConfiguration();c.setAllowedOrigins(List.of(allowedOrigin.split(",")));c.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));c.setAllowedHeaders(List.of("Content-Type","X-API-KEY","X-Request-ID","Authorization"));UrlBasedCorsConfigurationSource s=new UrlBasedCorsConfigurationSource();s.registerCorsConfiguration("/**",c);return s;} }
+
+import com.shiphappens.logistics.security.AppUserDetailsService;
+import com.shiphappens.logistics.security.IntegrationApiKeyFilter;
+import com.shiphappens.logistics.security.JwtAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+
+    @Bean
+    SecurityFilterChain security(HttpSecurity http, JwtAuthenticationFilter jwt, IntegrationApiKeyFilter apiKey) throws Exception {
+        return http
+                .csrf(c -> c.disable())
+                .cors(c -> {})
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(a -> a
+                        .requestMatchers(
+                                "/actuator/health",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/api/v1/auth/login",
+                                "/",
+                                "/index.html",
+                                "/styles.css",
+                                "/app.js",
+                                "/config.js",
+                                "/favicon.ico"
+                        ).permitAll()
+                        .requestMatchers("/api/v1/integrations/**").permitAll()
+                        .requestMatchers("/api/v1/webhooks/mock-receiver").permitAll()
+                        .requestMatchers("/api/v1/dashboard/**", "/api/v1/shipments/**").permitAll()
+                        .requestMatchers(
+                                "/api/v1/customers/**",
+                                "/api/v1/warehouses/**",
+                                "/api/v1/drivers/**",
+                                "/api/v1/vehicles/**",
+                                "/api/v1/reports/**",
+                                "/api/v1/auth/register",
+                                "/api/v1/webhooks/**"
+                        ).hasAnyRole("ADMIN", "OPERATIONS")
+                        .requestMatchers(
+                                "/api/v1/orders/**",
+                                "/api/v1/deliveries/**"
+                        ).hasAnyRole("ADMIN", "OPERATIONS", "CUSTOMER", "DRIVER")
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(jwt, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(apiKey, JwtAuthenticationFilter.class)
+                .build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource(@Value("${app.cors.allowed-origin}") String allowedOrigin) {
+        CorsConfiguration c = new CorsConfiguration();
+        c.setAllowedOrigins(List.of(allowedOrigin.split(",")));
+        c.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        c.setAllowedHeaders(List.of("Content-Type", "X-API-KEY", "X-Request-ID", "Authorization"));
+        c.setAllowCredentials(false);
+        UrlBasedCorsConfigurationSource s = new UrlBasedCorsConfigurationSource();
+        s.registerCorsConfiguration("/**", c);
+        return s;
+    }
+}
