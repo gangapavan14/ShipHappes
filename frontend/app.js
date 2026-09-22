@@ -15,8 +15,12 @@ const API = resolveApiBaseUrl();
 
 // Setup Swagger Docs link
 const docsLink = document.querySelector('#apiDocs');
+const mobileApiDocs = document.querySelector('#mobileApiDocs');
 if (docsLink) {
   docsLink.href = `${API.replace(/\/api\/v1$/, '')}/swagger-ui/index.html`;
+}
+if (mobileApiDocs) {
+  mobileApiDocs.href = `${API.replace(/\/api\/v1$/, '')}/swagger-ui/index.html`;
 }
 
 // State Management
@@ -34,6 +38,14 @@ const userRoleBadge = document.querySelector('#userRole');
 const loginModal = document.querySelector('#loginModal');
 const closeLoginModal = document.querySelector('#closeLoginModal');
 const loginForm = document.querySelector('#loginForm');
+
+const mobileMenuToggle = document.querySelector('#mobileMenuToggle');
+const mobileNavDrawer = document.querySelector('#mobileNavDrawer');
+const mobileNavBackdrop = document.querySelector('#mobileNavBackdrop');
+const closeMobileNavBtn = document.querySelector('#closeMobileNavBtn');
+const mobileNewOrderBtn = document.querySelector('#mobileNewOrderBtn');
+const mobileAuthRow = document.querySelector('#mobileAuthRow');
+const mobileApiStatusText = document.querySelector('#mobileApiStatusText');
 
 const statusFilter = document.querySelector('#statusFilter');
 const reloadBtn = document.querySelector('#reload');
@@ -53,6 +65,57 @@ const updateStatusForm = document.querySelector('#updateStatusForm');
 const integrationForm = document.querySelector('#integrationForm');
 const integrationOutput = document.querySelector('#integrationOutput');
 const openNewOrderBtn = document.querySelector('#openNewOrderBtn');
+
+// Mobile Navigation Drawer Controls
+function openMobileDrawer() {
+  if (!mobileNavDrawer || !mobileNavBackdrop) return;
+  mobileNavDrawer.classList.remove('hidden');
+  mobileNavBackdrop.classList.remove('hidden');
+  mobileMenuToggle?.setAttribute('aria-expanded', 'true');
+  mobileNavDrawer.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMobileDrawer() {
+  if (!mobileNavDrawer || !mobileNavBackdrop) return;
+  mobileNavDrawer.classList.add('hidden');
+  mobileNavBackdrop.classList.add('hidden');
+  mobileMenuToggle?.setAttribute('aria-expanded', 'false');
+  mobileNavDrawer.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+mobileMenuToggle?.addEventListener('click', () => {
+  const isExpanded = mobileMenuToggle.getAttribute('aria-expanded') === 'true';
+  if (isExpanded) {
+    closeMobileDrawer();
+  } else {
+    openMobileDrawer();
+  }
+});
+
+closeMobileNavBtn?.addEventListener('click', closeMobileDrawer);
+mobileNavBackdrop?.addEventListener('click', closeMobileDrawer);
+
+document.querySelectorAll('.mobile-nav-link').forEach(link => {
+  link.addEventListener('click', () => {
+    document.querySelectorAll('.mobile-nav-link').forEach(l => l.classList.remove('active'));
+    link.classList.add('active');
+    closeMobileDrawer();
+  });
+});
+
+mobileNewOrderBtn?.addEventListener('click', () => {
+  closeMobileDrawer();
+  document.querySelector('[data-tab="tabOrder"]')?.click();
+  document.querySelector('#operations-section')?.scrollIntoView({ behavior: 'smooth' });
+});
+
+loginModal?.addEventListener('click', (e) => {
+  if (e.target === loginModal) {
+    loginModal.classList.add('hidden');
+  }
+});
 
 // Toast Notification
 function showToast(message, type = 'success') {
@@ -109,9 +172,31 @@ function syncAuthUI() {
     userProfile.classList.remove('hidden');
     userEmailSpan.textContent = currentUser.email;
     userRoleBadge.textContent = currentUser.role;
+
+    if (mobileAuthRow) {
+      mobileAuthRow.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:6px; background:rgba(255,255,255,0.06); padding:10px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.1);">
+          <span style="font-size:12px; color:#e2e8f0; font-weight:600; word-break:break-all;">${currentUser.email}</span>
+          <span style="font-size:11px; color:#34d399; font-family:var(--font-mono);">${currentUser.role}</span>
+          <button id="mobileLogoutBtn" class="btn btn-xs btn-ghost" style="margin-top:4px; text-align:left; padding:4px 0; color:#ef4444; cursor:pointer;">Sign out</button>
+        </div>
+      `;
+      document.querySelector('#mobileLogoutBtn')?.addEventListener('click', () => {
+        logoutBtn.click();
+        closeMobileDrawer();
+      });
+    }
   } else {
     loginBtn.classList.remove('hidden');
     userProfile.classList.add('hidden');
+
+    if (mobileAuthRow) {
+      mobileAuthRow.innerHTML = `<button id="mobileLoginBtn" class="btn btn-sm btn-outline btn-block">Operator Login</button>`;
+      document.querySelector('#mobileLoginBtn')?.addEventListener('click', () => {
+        closeMobileDrawer();
+        loginModal.classList.remove('hidden');
+      });
+    }
   }
 }
 
@@ -126,8 +211,10 @@ async function loadDashboard() {
         el.textContent = metrics[k];
       }
     });
+    if (mobileApiStatusText) mobileApiStatusText.textContent = 'ONLINE';
   } catch (err) {
     console.error('Failed to load dashboard metrics:', err);
+    if (mobileApiStatusText) mobileApiStatusText.textContent = 'RETRYING';
   }
 }
 

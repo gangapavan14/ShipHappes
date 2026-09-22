@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1329">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ShipHappens">
   <title>ShipHappens — Modern Logistics & Supply Chain Control</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -43,9 +48,66 @@
             <button id="logoutBtn" class="btn btn-xs btn-ghost" title="Logout">Sign out</button>
           </div>
         </div>
+        <button id="mobileMenuToggle" class="mobile-menu-btn" aria-label="Toggle navigation menu" aria-expanded="false">
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+        </button>
       </div>
     </div>
   </header>
+
+  <!-- Mobile Navigation Drawer & Backdrop -->
+  <div id="mobileNavBackdrop" class="mobile-nav-backdrop hidden"></div>
+  <aside id="mobileNavDrawer" class="mobile-nav-drawer" aria-label="Mobile Navigation" aria-hidden="true">
+    <div class="mobile-drawer-header">
+      <div class="brand">
+        <span class="brand-icon">📦</span>
+        <span class="brand-name">Ship<span class="accent">Happens</span></span>
+        <span class="version-tag">PROD</span>
+      </div>
+      <button id="closeMobileNavBtn" class="mobile-drawer-close" aria-label="Close Navigation Menu">&times;</button>
+    </div>
+    <div class="mobile-nav-body">
+      <div class="mobile-nav-section-title">NAVIGATION</div>
+      <nav class="mobile-nav-links">
+        <a class="mobile-nav-link active" href="#dashboard">
+          <span class="mobile-nav-icon">📊</span>
+          <span class="mobile-nav-text">Dashboard</span>
+        </a>
+        <a class="mobile-nav-link" href="#shipments-section">
+          <span class="mobile-nav-icon">📦</span>
+          <span class="mobile-nav-text">Shipments</span>
+        </a>
+        <a class="mobile-nav-link" href="#operations-section">
+          <span class="mobile-nav-icon">⚡</span>
+          <span class="mobile-nav-text">Operations</span>
+        </a>
+        <a class="mobile-nav-link" href="#tracking-section">
+          <span class="mobile-nav-icon">🔍</span>
+          <span class="mobile-nav-text">Live Tracking</span>
+        </a>
+        <a id="mobileApiDocs" class="mobile-nav-link" href="#" target="_blank" rel="noopener">
+          <span class="mobile-nav-icon">📖</span>
+          <span class="mobile-nav-text">OpenAPI Docs ↗</span>
+        </a>
+      </nav>
+      <div class="mobile-nav-section-title">QUICK ACTIONS</div>
+      <div class="mobile-quick-actions">
+        <button id="mobileNewOrderBtn" class="btn btn-primary btn-block">+ Create Shipment</button>
+      </div>
+    </div>
+    <div class="mobile-drawer-footer">
+      <div class="mobile-status-row">
+        <span class="pulse-dot"></span>
+        <span class="mobile-status-label">Cloud Backend:</span>
+        <strong id="mobileApiStatusText" class="mobile-status-val">ONLINE</strong>
+      </div>
+      <div id="mobileAuthRow" class="mobile-auth-row">
+        <button id="mobileLoginBtn" class="btn btn-sm btn-outline btn-block">Operator Login</button>
+      </div>
+    </div>
+  </aside>
 
   <main class="app-main">
     <!-- Hero / Telemetry Banner -->
