@@ -1,6 +1,24 @@
+# Secrets
 .env
-*.log
+
+# Build output
 backend/target/
+
+# Logs
+*.log
+*.err.log
+
+# Frontend cache
 frontend/.cache/
+
+# IDE
 .idea/
 *.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
