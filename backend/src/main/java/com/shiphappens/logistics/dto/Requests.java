@@ -26,7 +26,12 @@ public final class Requests {
     public record Address(
             @NotBlank String addressLine1, String addressLine2,
             @NotBlank String city, @NotBlank String state,
-            @NotBlank String postalCode, @NotBlank String country) {}
+            @NotBlank String postalCode, @NotBlank String country,
+            Double latitude, Double longitude) {
+        public Address(String addressLine1, String addressLine2, String city, String state, String postalCode, String country) {
+            this(addressLine1, addressLine2, city, state, postalCode, country, null, null);
+        }
+    }
 
     public record Package(
             @NotBlank String description,
@@ -108,5 +113,7 @@ public final class Requests {
             Long customerId,
             @NotBlank @Pattern(regexp = "https?://.+") String targetUrl,
             @NotBlank @Size(min = 16) String secret) {}
+
+    public record PlanRoutes(List<Long> vehicleIds) {}
 }
 

@@ -4,6 +4,7 @@ import com.shiphappens.logistics.dto.Responses.*;
 import com.shiphappens.logistics.entity.*;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
@@ -186,6 +187,64 @@ public class EntityMapper {
                 customerId,
                 subscription.getTargetUrl(),
                 subscription.isActive()
+        );
+    }
+
+    public RouteStopResponse toRouteStopResponse(RouteStop stop) {
+        if (stop == null) return null;
+        Shipment shipment = stop.getShipment();
+        Long shipmentId = shipment != null ? shipment.getId() : null;
+        String shipmentNumber = shipment != null ? shipment.getShipmentNumber() : null;
+        String trackingNumber = shipment != null ? shipment.getTrackingNumber() : null;
+        String address = shipment != null ? shipment.getEffectiveDestinationAddress() : "";
+        BigDecimal weight = shipment != null ? shipment.getWeightKg() : null;
+
+        return new RouteStopResponse(
+                stop.getId(),
+                stop.getRoute() != null ? stop.getRoute().getId() : null,
+                shipmentId,
+                shipmentNumber,
+                trackingNumber,
+                stop.getSequenceOrder(),
+                stop.getDistanceFromPreviousKm(),
+                stop.getArrivalLatitude(),
+                stop.getArrivalLongitude(),
+                stop.getStatus() != null ? stop.getStatus().name() : null,
+                address,
+                weight
+        );
+    }
+
+    public RouteResponse toRouteResponse(Route route) {
+        if (route == null) return null;
+        List<RouteStopResponse> stopResponses = (route.getStops() != null)
+                ? route.getStops().stream().map(this::toRouteStopResponse).toList()
+                : Collections.emptyList();
+        return toRouteResponse(route, stopResponses);
+    }
+
+    public RouteResponse toRouteResponse(Route route, List<RouteStopResponse> stops) {
+        if (route == null) return null;
+        Vehicle vehicle = route.getVehicle();
+        Long vehicleId = vehicle != null ? vehicle.getId() : null;
+        String vehicleNumber = vehicle != null ? vehicle.getVehicleNumber() : null;
+        String vehicleType = vehicle != null ? vehicle.getVehicleType() : null;
+
+        return new RouteResponse(
+                route.getId(),
+                route.getRouteCode(),
+                vehicleId,
+                vehicleNumber,
+                vehicleType,
+                route.getStatus() != null ? route.getStatus().name() : null,
+                route.getTotalDistanceKm(),
+                route.getTotalWeightKg(),
+                route.getPlannedAt(),
+                route.getStartedAt(),
+                route.getCompletedAt(),
+                route.getCreatedAt(),
+                route.getUpdatedAt(),
+                stops != null ? stops : Collections.emptyList()
         );
     }
 }

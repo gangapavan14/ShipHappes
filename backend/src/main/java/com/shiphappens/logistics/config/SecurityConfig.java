@@ -48,9 +48,19 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/api/v1/integrations/**").permitAll()
                         .requestMatchers("/api/v1/webhooks/mock-receiver").permitAll()
-                        .requestMatchers("/api/v1/dashboard/**", "/api/v1/shipments/**").permitAll()
                         .requestMatchers(
-                                "/api/v1/customers/**",
+                                "/api/v1/dashboard/**",
+                                "/api/v1/shipments/**",
+                                "/api/v1/routes/**",
+                                "/api/v1/orders/**",
+                                "/api/v1/customers/**"
+                        ).permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET,
+                                "/api/v1/warehouses/**",
+                                "/api/v1/drivers/**",
+                                "/api/v1/vehicles/**"
+                        ).permitAll()
+                        .requestMatchers(
                                 "/api/v1/warehouses/**",
                                 "/api/v1/drivers/**",
                                 "/api/v1/vehicles/**",
@@ -59,7 +69,6 @@ public class SecurityConfig {
                                 "/api/v1/webhooks/**"
                         ).hasAnyRole("ADMIN", "OPERATIONS")
                         .requestMatchers(
-                                "/api/v1/orders/**",
                                 "/api/v1/deliveries/**"
                         ).hasAnyRole("ADMIN", "OPERATIONS", "CUSTOMER", "DRIVER")
                         .anyRequest().authenticated()
@@ -77,9 +86,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource(@Value("${app.cors.allowed-origin}") String allowedOrigin) {
         CorsConfiguration c = new CorsConfiguration();
-        c.setAllowedOrigins(List.of(allowedOrigin.split(",")));
+        c.addAllowedOriginPattern("*");
         c.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        c.setAllowedHeaders(List.of("Content-Type", "X-API-KEY", "X-Request-ID", "Authorization"));
+        c.setAllowedHeaders(List.of("*"));
         c.setAllowCredentials(false);
         UrlBasedCorsConfigurationSource s = new UrlBasedCorsConfigurationSource();
         s.registerCorsConfiguration("/**", c);

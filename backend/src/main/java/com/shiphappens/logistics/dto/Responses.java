@@ -73,5 +73,84 @@ public final class Responses {
     public record WarehouseUtilizationResponse(
             Long warehouseId, String warehouseCode, String name,
             int capacity, int currentLoad, double utilizationPercent) {}
+
+    public record RouteStopResponse(
+            Long id,
+            Long routeId,
+            Long shipmentId,
+            String shipmentNumber,
+            String trackingNumber,
+            int sequenceOrder,
+            BigDecimal distanceFromPreviousKm,
+            Double arrivalLatitude,
+            Double arrivalLongitude,
+            String status,
+            String destinationAddress,
+            BigDecimal weightKg) {}
+
+    public record RouteResponse(
+            Long id,
+            String routeCode,
+            Long vehicleId,
+            String vehicleNumber,
+            String vehicleType,
+            String status,
+            BigDecimal totalDistanceKm,
+            BigDecimal totalWeightKg,
+            Instant plannedAt,
+            Instant startedAt,
+            Instant completedAt,
+            Instant createdAt,
+            Instant updatedAt,
+            List<RouteStopResponse> stops,
+            BigDecimal initialDistanceKm,
+            BigDecimal distanceSavedKm,
+            BigDecimal savingsPercentage,
+            BigDecimal co2SavedKg) {
+        public RouteResponse(Long id, String routeCode, Long vehicleId, String vehicleNumber, String vehicleType,
+                             String status, BigDecimal totalDistanceKm, BigDecimal totalWeightKg, Instant plannedAt,
+                             Instant startedAt, Instant completedAt, Instant createdAt, Instant updatedAt,
+                             List<RouteStopResponse> stops) {
+            this(id, routeCode, vehicleId, vehicleNumber, vehicleType, status, totalDistanceKm, totalWeightKg,
+                 plannedAt, startedAt, completedAt, createdAt, updatedAt, stops, totalDistanceKm, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        }
+    }
+
+    public record UnassignedShipmentResponse(
+            Long shipmentId,
+            String trackingNumber,
+            String reason) {}
+
+    public record RoutePlanningResultResponse(
+            int routesCreated,
+            int shipmentsAssigned,
+            int shipmentsUnassigned,
+            List<RouteResponse> routes,
+            List<UnassignedShipmentResponse> unassignedShipments,
+            BigDecimal totalDistanceSavedKm,
+            BigDecimal totalCo2SavedKg) {
+        public RoutePlanningResultResponse(int routesCreated, int shipmentsAssigned, int shipmentsUnassigned,
+                                           List<RouteResponse> routes, List<UnassignedShipmentResponse> unassignedShipments) {
+            this(routesCreated, shipmentsAssigned, shipmentsUnassigned, routes, unassignedShipments, BigDecimal.ZERO, BigDecimal.ZERO);
+        }
+    }
+
+    public record DashboardSummaryResponse(
+            long totalShipments,
+            long created,
+            long assigned,
+            long pickedUp,
+            long inTransit,
+            long atWarehouse,
+            long outForDelivery,
+            long delivered,
+            long failed,
+            long cancelled,
+            long availableVehicles,
+            long assignedVehicles,
+            long availableDrivers,
+            long assignedDrivers,
+            long activeRoutes,
+            List<RouteResponse> recentRoutes) {}
 }
 

@@ -118,14 +118,25 @@ public class LogisticsService {
         order.setDeliveryAddress(toAddress(request.delivery()));
         order = orders.save(order);
 
+        BigDecimal totalWeight = BigDecimal.ZERO;
         for (Requests.Package requestPackage : request.packages()) {
             packages.save(toPackage(order, requestPackage));
+            if (requestPackage.weightKg() != null) {
+                totalWeight = totalWeight.add(requestPackage.weightKg());
+            }
         }
 
         Shipment shipment = new Shipment();
         shipment.setOrder(order);
         shipment.setShipmentNumber(code("SHP"));
         shipment.setTrackingNumber(code("TRK"));
+        shipment.setWeightKg(totalWeight);
+        if (request.delivery() != null) {
+            shipment.setDestinationLatitude(request.delivery().latitude());
+            shipment.setDestinationLongitude(request.delivery().longitude());
+            String addrStr = request.delivery().addressLine1() + ", " + request.delivery().city() + " " + request.delivery().postalCode();
+            shipment.setDestinationAddress(addrStr);
+        }
         shipment = shipments.save(shipment);
 
         recordEvent(shipment, "SHIPMENT_CREATED", "Shipment created", null);
@@ -260,8 +271,8 @@ public class LogisticsService {
     @Transactional
     public DeliveryAssignment assign(Requests.AssignDelivery request) {
         Shipment shipment = findShipment(request.shipmentId());
-        if (shipment.getStatus() != ShipmentStatus.CREATED && shipment.getStatus() != ShipmentStatus.AT_WAREHOUSE) {
-            throw conflict("Shipment must be CREATED or AT_WAREHOUSE before assignment");
+        if (shipment.getStatus() != ShipmentStatus.CREATED && shipment.getStatus() != ShipmentStatus.ASSIGNED && shipment.getStatus() != ShipmentStatus.AT_WAREHOUSE) {
+            throw conflict("Shipment must be CREATED, ASSIGNED, or AT_WAREHOUSE before assignment");
         }
         if (assignments.existsByShipmentAndStatusIn(shipment, List.of(DeliveryStatus.ASSIGNED, DeliveryStatus.PICKED_UP, DeliveryStatus.OUT_FOR_DELIVERY))) {
             throw conflict("Shipment already has an active delivery assignment");
@@ -511,7 +522,8 @@ public class LogisticsService {
 
     private boolean allowed(ShipmentStatus from, ShipmentStatus to) {
         return switch (from) {
-            case CREATED -> to == ShipmentStatus.PICKED_UP || to == ShipmentStatus.CANCELLED;
+            case CREATED -> to == ShipmentStatus.ASSIGNED || to == ShipmentStatus.PICKED_UP || to == ShipmentStatus.CANCELLED;
+            case ASSIGNED -> to == ShipmentStatus.PICKED_UP || to == ShipmentStatus.CANCELLED;
             case PICKED_UP -> to == ShipmentStatus.IN_TRANSIT || to == ShipmentStatus.FAILED;
             case IN_TRANSIT -> to == ShipmentStatus.AT_WAREHOUSE || to == ShipmentStatus.FAILED;
             case AT_WAREHOUSE -> to == ShipmentStatus.OUT_FOR_DELIVERY || to == ShipmentStatus.FAILED;

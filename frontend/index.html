@@ -3,464 +3,1009 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b1329">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="ShipHappens">
-  <title>ShipHappens — Modern Logistics & Supply Chain Control</title>
+  <meta name="theme-color" content="#090a0f">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>ShipHappens &mdash; Autonomous Logistics &amp; Route Intelligence</title>
+  
+  <!-- Modern Clean Enterprise Typography: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet GIS Map Styling -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <!-- Core Stylesheet with Cache Buster -->
+  <link rel="stylesheet" href="styles.css?v=2.0.5">
 </head>
-<body>
-  <!-- Global Notification Banner -->
-  <div id="toast" class="toast hidden"></div>
+<body class="spa-body">
+  <!-- Notification Toast -->
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
-  <!-- Header -->
-  <header class="app-header">
-    <div class="header-inner">
-      <a class="brand" href="#">
-        <span class="brand-icon">📦</span>
-        <span class="brand-name">Ship<span class="accent">Happens</span></span>
-        <span class="version-tag">PROD</span>
-      </a>
-
-      <nav class="nav-links">
-        <a class="nav-link active" href="#dashboard">Dashboard</a>
-        <a class="nav-link" href="#shipments-section">Shipments</a>
-        <a class="nav-link" href="#operations-section">Operations</a>
-        <a class="nav-link" href="#tracking-section">Tracking</a>
-        <a id="apiDocs" class="nav-link" href="#" target="_blank" rel="noopener">OpenAPI ↗</a>
-      </nav>
-
-      <div class="header-right">
-        <div class="status-indicator" id="apiStatusBadge" style="cursor: pointer;" title="Click to view or change Backend API URL">
-          <span class="pulse-dot" id="apiPulseDot"></span>
-          <span class="status-text" id="apiStatusText">ONLINE</span>
-        </div>
-        <div id="authContainer" class="auth-box">
-          <button id="loginBtn" class="btn btn-sm btn-outline">Operator Login</button>
-          <div id="userProfile" class="user-profile hidden">
-            <span id="userEmail" class="user-email"></span>
-            <span id="userRole" class="badge badge-role"></span>
-            <button id="logoutBtn" class="btn btn-xs btn-ghost" title="Logout">Sign out</button>
+  <!-- Main Application Shell -->
+  <div class="app-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <a class="sidebar-brand" href="#dashboard">
+          <div class="brand-mark">
+            <i data-lucide="box" class="brand-icon"></i>
           </div>
-        </div>
-        <button id="mobileMenuToggle" class="mobile-menu-btn" aria-label="Toggle navigation menu" aria-expanded="false">
-          <span class="hamburger-bar"></span>
-          <span class="hamburger-bar"></span>
-          <span class="hamburger-bar"></span>
-        </button>
+          <div class="brand-meta">
+            <span class="brand-name">Ship<span class="text-accent">Happens</span></span>
+            <span class="brand-tag">ROUTING OS &bull; V2.0</span>
+          </div>
+        </a>
       </div>
-    </div>
-  </header>
 
-  <!-- Mobile Navigation Drawer & Backdrop -->
-  <div id="mobileNavBackdrop" class="mobile-nav-backdrop hidden"></div>
-  <aside id="mobileNavDrawer" class="mobile-nav-drawer" aria-label="Mobile Navigation" aria-hidden="true">
-    <div class="mobile-drawer-header">
-      <div class="brand">
-        <span class="brand-icon">📦</span>
-        <span class="brand-name">Ship<span class="accent">Happens</span></span>
-        <span class="version-tag">PROD</span>
-      </div>
-      <button id="closeMobileNavBtn" class="mobile-drawer-close" aria-label="Close Navigation Menu">&times;</button>
-    </div>
-    <div class="mobile-nav-body">
-      <div class="mobile-nav-section-title">NAVIGATION</div>
-      <nav class="mobile-nav-links">
-        <a class="mobile-nav-link active" href="#dashboard">
-          <span class="mobile-nav-icon">📊</span>
-          <span class="mobile-nav-text">Dashboard</span>
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">DISPATCH &amp; ROUTING</div>
+        <a class="nav-link active" href="#dashboard" data-view="dashboard">
+          <i data-lucide="layout-dashboard" class="nav-icon"></i>
+          <span class="nav-text">Dashboard</span>
         </a>
-        <a class="mobile-nav-link" href="#shipments-section">
-          <span class="mobile-nav-icon">📦</span>
-          <span class="mobile-nav-text">Shipments</span>
+        <a class="nav-link" href="#routes" data-view="routes">
+          <i data-lucide="map" class="nav-icon"></i>
+          <span class="nav-text">Route Planning</span>
+          <span class="nav-badge badge-accent" id="sidebarRoutesBadge">0</span>
         </a>
-        <a class="mobile-nav-link" href="#operations-section">
-          <span class="mobile-nav-icon">⚡</span>
-          <span class="mobile-nav-text">Operations</span>
+        <a class="nav-link" href="#shipments" data-view="shipments">
+          <i data-lucide="package" class="nav-icon"></i>
+          <span class="nav-text">Shipments</span>
+          <span class="nav-badge" id="sidebarShipmentsBadge">0</span>
         </a>
-        <a class="mobile-nav-link" href="#tracking-section">
-          <span class="mobile-nav-icon">🔍</span>
-          <span class="mobile-nav-text">Live Tracking</span>
+        <a class="nav-link" href="#customers" data-view="customers">
+          <i data-lucide="building-2" class="nav-icon"></i>
+          <span class="nav-text">Customers</span>
+          <span class="nav-badge" id="sidebarCustomersBadge">0</span>
         </a>
-        <a id="mobileApiDocs" class="mobile-nav-link" href="#" target="_blank" rel="noopener">
-          <span class="mobile-nav-icon">📖</span>
-          <span class="mobile-nav-text">OpenAPI Docs ↗</span>
+        <a class="nav-link" href="#tracking" data-view="tracking">
+          <i data-lucide="activity" class="nav-icon"></i>
+          <span class="nav-text">Live Telemetry</span>
+        </a>
+
+        <div class="nav-section-title">FLEET ASSETS</div>
+        <a class="nav-link" href="#vehicles" data-view="vehicles">
+          <i data-lucide="truck" class="nav-icon"></i>
+          <span class="nav-text">Fleet Vehicles</span>
+        </a>
+        <a class="nav-link" href="#drivers" data-view="drivers">
+          <i data-lucide="user-check" class="nav-icon"></i>
+          <span class="nav-text">Drivers</span>
+        </a>
+
+        <div class="nav-section-title">INTELLIGENCE &amp; API</div>
+        <a class="nav-link" href="#integrations" data-view="integrations">
+          <i data-lucide="terminal" class="nav-icon"></i>
+          <span class="nav-text">B2B Integration</span>
+        </a>
+        <a class="nav-link" id="sidebarSwaggerLink" href="#" target="_blank" rel="noopener">
+          <i data-lucide="external-link" class="nav-icon"></i>
+          <span class="nav-text">OpenAPI Docs</span>
         </a>
       </nav>
-      <div class="mobile-nav-section-title">QUICK ACTIONS</div>
-      <div class="mobile-quick-actions">
-        <button id="mobileNewOrderBtn" class="btn btn-primary btn-block">+ Create Shipment</button>
-      </div>
-    </div>
-    <div class="mobile-drawer-footer">
-      <div class="mobile-status-row">
-        <span class="pulse-dot"></span>
-        <span class="mobile-status-label">Cloud Backend:</span>
-        <strong id="mobileApiStatusText" class="mobile-status-val">ONLINE</strong>
-      </div>
-      <div id="mobileAuthRow" class="mobile-auth-row">
-        <button id="mobileLoginBtn" class="btn btn-sm btn-outline btn-block">Operator Login</button>
-      </div>
-    </div>
-  </aside>
 
-  <main class="app-main">
-    <!-- Hero / Telemetry Banner -->
-    <section class="hero-banner">
-      <div class="hero-content">
-        <span class="pill-badge">ENTERPRISE LOGISTICS SUITE</span>
-        <h1>Every shipment delivered.<br><em>Zero blind spots.</em></h1>
-        <p class="hero-sub">Real-time lifecycle tracking, driver assignments, and automated carrier webhooks in a unified control plane.</p>
-        <div class="hero-actions">
-          <button id="openNewOrderBtn" class="btn btn-primary">+ Create New Shipment</button>
-          <a href="#tracking-section" class="btn btn-secondary">Track by ID / Number</a>
+      <!-- Sidebar Operator Profile -->
+      <div class="sidebar-footer">
+        <div class="operator-profile" id="operatorCard">
+          <div class="operator-avatar" id="operatorAvatar">OP</div>
+          <div class="operator-details">
+            <span class="operator-name" id="operatorName">Guest Dispatcher</span>
+            <span class="operator-role" id="operatorRoleBadge">READ ONLY</span>
+          </div>
+          <button class="btn-auth-toggle" id="authActionBtn" title="Sign In">
+            <i data-lucide="key" class="icon-sm"></i>
+          </button>
         </div>
       </div>
-      <div class="telemetry-card">
-        <div class="telemetry-header">
-          <span class="telemetry-title">CORRIDOR MONITOR</span>
-          <span class="telemetry-badge">LIVE RELAY</span>
-        </div>
-        <div class="route-visual">
-          <div class="node origin">
-            <span class="city-code">HYD</span>
-            <span class="node-label">Origin Hub</span>
-          </div>
-          <div class="transit-line">
-            <div class="line-progress"></div>
-            <div class="truck-marker">🚚</div>
-          </div>
-          <div class="node destination">
-            <span class="city-code">BLR</span>
-            <span class="node-label">Destination</span>
-          </div>
-        </div>
-        <div class="telemetry-footer">
-          <span>Route: NH-44 Express</span>
-          <span class="highlight-green">99.4% On-time SLA</span>
-        </div>
-      </div>
-    </section>
+    </aside>
 
-    <!-- Operational Metrics -->
-    <section id="dashboard" class="metrics-grid">
-      <div class="metric-card">
-        <div class="metric-icon">📦</div>
-        <div class="metric-body">
-          <span class="metric-label">Active Shipments</span>
-          <strong id="activeShipments" class="metric-value">—</strong>
-          <span class="metric-hint">In system pipeline</span>
-        </div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-icon">🛣️</div>
-        <div class="metric-body">
-          <span class="metric-label">In Transit</span>
-          <strong id="inTransit" class="metric-value">—</strong>
-          <span class="metric-hint">Moving on highways</span>
-        </div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-icon">🚚</div>
-        <div class="metric-body">
-          <span class="metric-label">Out For Delivery</span>
-          <strong id="outForDelivery" class="metric-value">—</strong>
-          <span class="metric-hint">Final mile dispatch</span>
-        </div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-icon">🏢</div>
-        <div class="metric-body">
-          <span class="metric-label">At Warehouse</span>
-          <strong id="atWarehouse" class="metric-value">—</strong>
-          <span class="metric-hint">Sorted &amp; staged</span>
-        </div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-icon">📍</div>
-        <div class="metric-body">
-          <span class="metric-label">Picked Up</span>
-          <strong id="pickedUp" class="metric-value">—</strong>
-          <span class="metric-hint">Awaiting consolidation</span>
-        </div>
-      </div>
-      <div class="metric-card success">
-        <div class="metric-icon">✅</div>
-        <div class="metric-body">
-          <span class="metric-label">Delivered</span>
-          <strong id="delivered" class="metric-value">—</strong>
-          <span class="metric-hint">Fulfilled orders</span>
-        </div>
-      </div>
-      <div class="metric-card danger">
-        <div class="metric-icon">⚠️</div>
-        <div class="metric-body">
-          <span class="metric-label">Delivery Failed</span>
-          <strong id="failed" class="metric-value">—</strong>
-          <span class="metric-hint">Requires exception handling</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Main Workspace: Shipments Table & Tracking Sidebar -->
-    <div class="workspace-grid">
-      <!-- Shipments List Panel -->
-      <section id="shipments-section" class="panel shipments-panel">
-        <div class="panel-header">
-          <div>
-            <span class="panel-eyebrow">DISPATCH LOG</span>
-            <h2>Shipment Registry</h2>
-          </div>
-          <div class="panel-controls">
-            <select id="statusFilter" class="form-select">
-              <option value="">All Statuses</option>
-              <option value="CREATED">Created</option>
-              <option value="PICKED_UP">Picked Up</option>
-              <option value="IN_TRANSIT">In Transit</option>
-              <option value="AT_WAREHOUSE">At Warehouse</option>
-              <option value="OUT_FOR_DELIVERY">Out For Delivery</option>
-              <option value="DELIVERED">Delivered</option>
-              <option value="FAILED">Failed</option>
-              <option value="CANCELLED">Cancelled</option>
-            </select>
-            <button id="reload" class="btn btn-secondary btn-sm">↺ Refresh</button>
+    <!-- App Viewport -->
+    <div class="app-viewport">
+      
+      <!-- Top Navigation Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="sidebarToggleBtn" aria-label="Toggle navigation">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="view-breadcrumb">
+            <span class="breadcrumb-root">Workspace</span>
+            <span class="breadcrumb-slash">/</span>
+            <h1 class="view-title" id="currentViewTitle">Operations Dashboard</h1>
           </div>
         </div>
 
-        <div class="table-container">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Shipment / Tracking</th>
-                <th>Order Ref</th>
-                <th>Customer</th>
-                <th>Destination</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="shipmentsTableBody">
-              <tr>
-                <td colspan="6" class="table-empty">Connecting to logistics API...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- Tracking Inspector Panel -->
-      <aside id="tracking-section" class="panel tracking-panel">
-        <div class="panel-header">
-          <div>
-            <span class="panel-eyebrow">LIVE TELEMETRY</span>
-            <h2>Event Tracking</h2>
+        <div class="topbar-right">
+          <!-- Backend Relay Health Pill -->
+          <div class="relay-pill" id="backendStatusPill" title="API Status">
+            <span class="relay-dot" id="relayDot"></span>
+            <span class="relay-label" id="relayLabel">BACKEND ONLINE</span>
+            <span class="relay-port">8080</span>
           </div>
+
+          <!-- Executive Demo Quick-Loader -->
+          <button class="btn btn-demo" id="globalDemoScenarioBtn" title="Load High-Volume Multi-Cluster Corridors with 2-Opt TSP">
+            <i data-lucide="sparkles" class="btn-icon"></i>
+            <span>Executive Demo</span>
+          </button>
+
+          <!-- New Dispatch CTA -->
+          <button class="btn btn-primary" id="globalNewShipmentBtn">
+            <i data-lucide="plus" class="btn-icon"></i>
+            <span>New Shipment</span>
+          </button>
         </div>
+      </header>
 
-        <form id="trackingForm" class="tracking-search-form">
-          <input id="shipmentId" type="number" placeholder="Enter Shipment ID (e.g. 1)" required class="form-input">
-          <button type="submit" class="btn btn-primary">Track</button>
-        </form>
+      <!-- Main Canvas Container -->
+      <main class="viewport-canvas" id="viewportCanvas">
 
-        <div id="trackingResultMeta" class="tracking-meta hidden">
-          <div class="meta-row">
-            <span class="meta-title" id="trackShipmentCode"></span>
-            <span id="trackStatusBadge" class="badge"></span>
-          </div>
-          <div class="meta-sub" id="trackTrackingCode"></div>
-        </div>
-
-        <div class="timeline-wrapper">
-          <ol id="events" class="event-timeline">
-            <li class="timeline-empty">
-              <div class="timeline-bullet"></div>
-              <div class="timeline-content">
-                <strong>Awaiting Tracking Inquiry</strong>
-                <p>Click "Track" on any shipment row or enter a shipment ID above to inspect its complete immutable audit log.</p>
+        <!-- ========================================== -->
+        <!-- VIEW 1: DASHBOARD -->
+        <!-- ========================================== -->
+        <section class="spa-view active" id="view-dashboard">
+          
+          <!-- KPI Metrics Grid -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-label">Active Pipeline</span>
+                <i data-lucide="boxes" class="kpi-icon"></i>
               </div>
-            </li>
-          </ol>
-        </div>
-      </aside>
+              <div class="kpi-number font-mono" id="dashActiveShipments">&mdash;</div>
+              <div class="kpi-meta">All shipments in pipeline</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-label">Assigned</span>
+                <i data-lucide="check-square" class="kpi-icon text-indigo"></i>
+              </div>
+              <div class="kpi-number font-mono" id="dashAssigned">&mdash;</div>
+              <div class="kpi-meta">Allocated to vehicle runs</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-label">Active Routes</span>
+                <i data-lucide="navigation-2" class="kpi-icon text-emerald"></i>
+              </div>
+              <div class="kpi-number font-mono" id="dashActiveRoutes">&mdash;</div>
+              <div class="kpi-meta">Sequenced delivery tours</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-label">In Transit</span>
+                <i data-lucide="truck" class="kpi-icon"></i>
+              </div>
+              <div class="kpi-number font-mono" id="dashInTransit">&mdash;</div>
+              <div class="kpi-meta">En route between depots</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-label">Out For Delivery</span>
+                <i data-lucide="map-pin" class="kpi-icon text-amber"></i>
+              </div>
+              <div class="kpi-number font-mono" id="dashOutForDelivery">&mdash;</div>
+              <div class="kpi-meta">Last-mile dropoffs</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-label">Delivered</span>
+                <i data-lucide="check-circle-2" class="kpi-icon text-emerald"></i>
+              </div>
+              <div class="kpi-number font-mono" id="dashDelivered">&mdash;</div>
+              <div class="kpi-meta">Successfully completed</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-label">Exceptions</span>
+                <i data-lucide="alert-triangle" class="kpi-icon text-rose"></i>
+              </div>
+              <div class="kpi-number font-mono" id="dashFailed">&mdash;</div>
+              <div class="kpi-meta">Requires dispatcher review</div>
+            </div>
+          </div>
+
+          <!-- Optimization Telemetry & Carbon Savings HUD -->
+          <div class="opt-hud" id="optimizationHud">
+            <div class="hud-metric">
+              <span class="hud-label">ALGORITHM</span>
+              <span class="hud-val font-mono">2-Opt Local Search</span>
+              <span class="hud-sub">Nearest-Neighbor Seed</span>
+            </div>
+            <div class="hud-divider"></div>
+            <div class="hud-metric">
+              <span class="hud-label">DISTANCE REDUCTION</span>
+              <span class="hud-val font-mono text-emerald" id="hudDistanceSaved">0.00 km</span>
+              <span class="hud-sub" id="hudSavingsPct">0.0% efficiency gain</span>
+            </div>
+            <div class="hud-divider"></div>
+            <div class="hud-metric">
+              <span class="hud-label">CARBON AVOIDED</span>
+              <span class="hud-val font-mono text-emerald" id="hudCo2Saved">0.00 kg CO₂</span>
+              <span class="hud-sub">0.24 kg/km fleet baseline</span>
+            </div>
+            <div class="hud-divider"></div>
+            <div class="hud-metric">
+              <span class="hud-label">FLEET UTILIZATION</span>
+              <span class="hud-val font-mono text-accent" id="hudFleetRoutesCount">0 Active Routes</span>
+              <span class="hud-sub" id="hudFleetVehiclesCount">Capacity bin-packed</span>
+            </div>
+          </div>
+
+          <!-- Command Center Split: Live Map + Simulation & Fleet Status -->
+          <div class="dashboard-command-grid">
+            <div class="route-map-shell">
+              <div class="map-toolbar">
+                <div class="map-toolbar-left">
+                  <span class="map-label"><i data-lucide="map-pin" class="icon-xs"></i> HYDERABAD METRO REGION</span>
+                  <div class="route-filter-tabs" id="routeMapFilterTabs">
+                    <button class="map-tab active" data-filter-type="all">All Routes</button>
+                  </div>
+                  <div class="consignment-filter-wrap">
+                    <label class="sim-label"><i data-lucide="package" class="icon-xs"></i> Consignment:</label>
+                    <select id="consignmentFilterSelect" class="consignment-select">
+                      <option value="all">📦 All Consignments</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="map-toolbar-right">
+                  <div class="sim-speed-wrap">
+                    <label class="sim-label">Speed:</label>
+                    <select id="simSpeedSelect" class="form-select form-select-xs">
+                      <option value="1">1x</option>
+                      <option value="2" selected>2x</option>
+                      <option value="5">5x</option>
+                    </select>
+                  </div>
+                  <button class="btn btn-sm btn-secondary" id="runSimulationBtn">
+                    <i data-lucide="play" class="icon-xs"></i>
+                    <span>Run Simulation</span>
+                  </button>
+                  <button class="btn btn-sm btn-secondary" id="resetSimulationBtn" title="Reset Simulation">
+                    <i data-lucide="square" class="icon-xs"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Map Viewport Canvas -->
+              <div id="routeLeafletMap" class="leaflet-map-canvas"></div>
+
+              <!-- Simulation Floating Telemetry Overlay (Multi-Carrier Fleet) -->
+              <div class="sim-overlay hidden" id="simulationTelemetryOverlay">
+                <div class="sim-overlay-header">
+                  <div class="sim-overlay-header-left">
+                    <span class="sim-pulse-dot"></span>
+                    <span class="sim-title" id="simFleetHeaderTitle">LIVE FLEET TELEMETRY</span>
+                  </div>
+                  <span class="font-mono text-emerald" style="font-size:10px;">ACTIVE GPS (3 CARRIERS)</span>
+                </div>
+                <div class="sim-fleet-rows" id="simFleetRows">
+                  <!-- Dynamically populated per vehicle -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Command Side Panel: Fleet Utilization & Live Dispatch Pipeline -->
+            <div class="command-side-panel">
+              <!-- Fleet Utilization Widget -->
+              <div class="panel-sub-card">
+                <div class="sub-card-header">
+                  <h4><i data-lucide="truck" class="icon-xs text-accent"></i> Active Fleet Carriers</h4>
+                  <a href="#vehicles" class="font-mono text-tertiary" style="font-size:10.5px; text-decoration:none;">View All &rarr;</a>
+                </div>
+                <div class="fleet-capacity-list" id="dashFleetCapacityList">
+                  <div class="table-empty">Loading fleet carriers...</div>
+                </div>
+              </div>
+
+              <!-- Live Dispatch Feed Widget -->
+              <div class="panel-sub-card">
+                <div class="sub-card-header">
+                  <h4><i data-lucide="package" class="icon-xs text-indigo"></i> Live Dispatch Feed</h4>
+                  <a href="#shipments" class="font-mono text-tertiary" style="font-size:10.5px; text-decoration:none;">Registry &rarr;</a>
+                </div>
+                <div class="live-feed-list" id="dashLiveFeedList">
+                  <div class="table-empty">Loading active orders...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Planned Route Manifests Strip -->
+          <div class="routes-section-title">
+            <h3>Planned Route Tours &amp; Driver Run Sheets</h3>
+            <div style="display:flex; gap:8px;">
+              <button id="dashTriggerRoutePlanBtn" class="btn btn-primary btn-sm">
+                <i data-lucide="zap" class="icon-xs"></i>
+                <span>Optimize &amp; Plan Routes</span>
+              </button>
+              <button id="dashDemoScenarioBtn" class="btn btn-demo btn-sm">
+                <i data-lucide="sparkles" class="icon-xs"></i>
+                <span>Reset Demo Scenario</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="routesGridContainer" class="routes-cards-grid">
+            <div class="table-empty" style="grid-column: 1 / -1;">No active routes planned. Click "Executive Demo" above.</div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: ROUTE PLANNING & INTERACTIVE MAP -->
+        <!-- ========================================== -->
+        <section class="spa-view hidden" id="view-routes">
+          <div class="view-panel">
+            
+            <div class="panel-header">
+              <div>
+                <span class="panel-tag">AUTONOMOUS OPTIMIZATION &bull; 2-OPT TSP</span>
+                <h2 class="panel-title">Fleet Route Dispatch &amp; Map Visualizer</h2>
+              </div>
+              <div class="panel-actions">
+                <button id="triggerRoutePlanBtn" class="btn btn-primary">
+                  <i data-lucide="zap" class="btn-icon"></i>
+                  <span>Optimize &amp; Plan Routes</span>
+                </button>
+                <button id="routesDemoScenarioBtn" class="btn btn-demo">
+                  <i data-lucide="sparkles" class="btn-icon"></i>
+                  <span>Load Executive Demo</span>
+                </button>
+                <button id="refreshRoutesBtn" class="btn btn-secondary btn-sm" title="Refresh">
+                  <i data-lucide="rotate-cw" class="icon-sm"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Optimization Telemetry & Carbon Savings HUD -->
+            <div class="opt-hud" id="optimizationHud">
+              <div class="hud-metric">
+                <span class="hud-label">ALGORITHM</span>
+                <span class="hud-val font-mono">2-Opt Local Search</span>
+                <span class="hud-sub">Nearest-Neighbor Seed</span>
+              </div>
+              <div class="hud-divider"></div>
+              <div class="hud-metric">
+                <span class="hud-label">DISTANCE REDUCTION</span>
+                <span class="hud-val font-mono text-emerald" id="hudDistanceSaved">0.00 km</span>
+                <span class="hud-sub" id="hudSavingsPct">0.0% efficiency gain</span>
+              </div>
+              <div class="hud-divider"></div>
+              <div class="hud-metric">
+                <span class="hud-label">CARBON AVOIDED</span>
+                <span class="hud-val font-mono text-emerald" id="hudCo2Saved">0.00 kg CO₂</span>
+                <span class="hud-sub">0.24 kg/km fleet baseline</span>
+              </div>
+              <div class="hud-divider"></div>
+              <div class="hud-metric">
+                <span class="hud-label">FLEET UTILIZATION</span>
+                <span class="hud-val font-mono text-accent" id="hudFleetRoutesCount">0 Active Routes</span>
+                <span class="hud-sub" id="hudFleetVehiclesCount">Capacity bin-packed</span>
+              </div>
+            </div>
+
+            <!-- Route Dispatch Workbench Banner -->
+            <div class="panel-sub-card" style="margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; background: linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(16,185,129,0.04) 100%); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
+              <div style="display:flex; align-items:center; gap:16px;">
+                <div style="width:44px; height:44px; border-radius:50%; background:rgba(37,99,235,0.15); border:1px solid rgba(37,99,235,0.3); display:flex; align-items:center; justify-content:center; color:var(--text-accent);">
+                  <i data-lucide="navigation" style="width:22px; height:22px;"></i>
+                </div>
+                <div>
+                  <h4 style="font-size:14px; font-weight:600; color:#fff; margin:0 0 4px 0;">Live GPS Simulation &amp; Multi-Carrier Map Active</h4>
+                  <p style="font-size:12px; color:var(--text-secondary); margin:0;">Track live vehicles, filter by consignment, and watch 60 FPS GPS telemetry directly on the command center.</p>
+                </div>
+              </div>
+              <a href="#dashboard" class="btn btn-primary btn-sm" style="text-decoration:none;">
+                <i data-lucide="map" class="icon-xs"></i>
+                <span>Open Operations Command Map</span>
+              </a>
+            </div>
+
+            <!-- Planned Route Cards Grid -->
+            <div class="routes-section-title">
+              <h3>Sequenced Route Manifests</h3>
+              <span class="routes-count-tag" id="routesCountTag">0 routes planned</span>
+            </div>
+
+            <div id="routesPlanningGridContainer" class="routes-cards-grid">
+              <div class="table-empty" style="grid-column: 1 / -1;">No active routes planned. Click "Optimize &amp; Plan Routes" or "Executive Demo" above.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 3: SHIPMENTS REGISTRY -->
+        <!-- ========================================== -->
+        <section class="spa-view hidden" id="view-shipments">
+          <div class="view-panel">
+            <div class="panel-header">
+              <div>
+                <span class="panel-tag">LIFECYCLE AUDIT &bull; INVENTORY</span>
+                <h2 class="panel-title">Shipments Pipeline</h2>
+              </div>
+              <div class="panel-actions">
+                <div class="search-wrap">
+                  <i data-lucide="search" class="search-icon"></i>
+                  <input type="text" id="shipmentSearchInput" class="form-input form-input-sm" placeholder="Search tracking #, customer...">
+                </div>
+                <select id="shipmentStatusFilter" class="form-select form-select-sm">
+                  <option value="">All Statuses</option>
+                  <option value="CREATED">Created (Pending Route)</option>
+                  <option value="ASSIGNED">Assigned to Route</option>
+                  <option value="PICKED_UP">Picked Up</option>
+                  <option value="IN_TRANSIT">In Transit</option>
+                  <option value="AT_WAREHOUSE">At Warehouse</option>
+                  <option value="OUT_FOR_DELIVERY">Out For Delivery</option>
+                  <option value="DELIVERED">Delivered</option>
+                  <option value="FAILED">Failed</option>
+                  <option value="CANCELLED">Cancelled</option>
+                </select>
+                <button id="refreshShipmentsBtn" class="btn btn-secondary btn-sm" title="Refresh">
+                  <i data-lucide="rotate-cw" class="icon-sm"></i>
+                </button>
+                <button id="openDispatchModalBtn" class="btn btn-primary btn-sm">
+                  <i data-lucide="plus" class="icon-xs"></i>
+                  <span>New Shipment</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Shipment / Tracking</th>
+                    <th>Order Reference</th>
+                    <th>Customer</th>
+                    <th>Destination Corridor</th>
+                    <th>Payload</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="shipmentsTableBody">
+                  <tr><td colspan="7" class="table-empty">Connecting to logistics API...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 4: CUSTOMERS REGISTRY -->
+        <!-- ========================================== -->
+        <section class="spa-view hidden" id="view-customers">
+          <div class="view-panel">
+            <div class="panel-header">
+              <div>
+                <span class="panel-tag">PORTFOLIO &bull; CLIENT MASTER</span>
+                <h2 class="panel-title">Customer Registry</h2>
+              </div>
+              <div class="panel-actions">
+                <div class="search-wrap">
+                  <i data-lucide="search" class="search-icon"></i>
+                  <input type="text" id="customerSearchInput" class="form-input form-input-sm" placeholder="Search customer name, code...">
+                </div>
+                <button id="refreshCustomersBtn" class="btn btn-secondary btn-sm" title="Refresh">
+                  <i data-lucide="rotate-cw" class="icon-sm"></i>
+                </button>
+                <button id="openNewCustomerModalBtn" class="btn btn-primary btn-sm">
+                  <i data-lucide="user-plus" class="icon-xs"></i>
+                  <span>Register Customer</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Customer Code</th>
+                    <th>Company Name</th>
+                    <th>Contact Email</th>
+                    <th>Phone Contact</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="customersTableBody">
+                  <tr><td colspan="7" class="table-empty">Loading customers registry...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 5: VEHICLES FLEET -->
+        <!-- ========================================== -->
+        <section class="spa-view hidden" id="view-vehicles">
+          <div class="view-panel">
+            <div class="panel-header">
+              <div>
+                <span class="panel-tag">PHYSICAL ASSETS &bull; CAPACITY</span>
+                <h2 class="panel-title">Fleet Vehicles Inventory</h2>
+              </div>
+              <div class="panel-actions">
+                <button id="addVehicleModalBtn" class="btn btn-primary btn-sm">
+                  <i data-lucide="plus" class="icon-xs"></i>
+                  <span>Register Vehicle</span>
+                </button>
+                <button id="refreshVehiclesBtn" class="btn btn-secondary btn-sm" title="Refresh">
+                  <i data-lucide="rotate-cw" class="icon-sm"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>License Plate</th>
+                    <th>Vehicle Classification</th>
+                    <th>Max Payload Capacity</th>
+                    <th>Depot Origin Coords</th>
+                    <th>Operational Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="vehiclesTableBody">
+                  <tr><td colspan="6" class="table-empty">Loading vehicle fleet...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 6: DRIVERS REGISTRY -->
+        <!-- ========================================== -->
+        <section class="spa-view hidden" id="view-drivers">
+          <div class="view-panel">
+            <div class="panel-header">
+              <div>
+                <span class="panel-tag">PERSONNEL &bull; ROSTER</span>
+                <h2 class="panel-title">Drivers Roster</h2>
+              </div>
+              <div class="panel-actions">
+                <button id="addDriverModalBtn" class="btn btn-primary btn-sm">
+                  <i data-lucide="plus" class="icon-xs"></i>
+                  <span>Register Driver</span>
+                </button>
+                <button id="refreshDriversBtn" class="btn btn-secondary btn-sm" title="Refresh">
+                  <i data-lucide="rotate-cw" class="icon-sm"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Driver Code</th>
+                    <th>Operator Name</th>
+                    <th>Phone Contact</th>
+                    <th>Driver License #</th>
+                    <th>Duty Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="driversTableBody">
+                  <tr><td colspan="6" class="table-empty">Loading drivers roster...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 7: LIVE TELEMETRY & TRACKING -->
+        <!-- ========================================== -->
+        <section class="spa-view hidden" id="view-tracking">
+          <div class="view-panel tracking-view-panel">
+            <div class="panel-header">
+              <div>
+                <span class="panel-tag">IMMUTABLE AUDIT TRAIL</span>
+                <h2 class="panel-title">Shipment Telemetry Inspector</h2>
+              </div>
+            </div>
+
+            <div class="tracking-search-bar">
+              <form id="trackingSearchForm" class="tracking-input-group">
+                <input type="number" id="trackingQueryInput" class="form-input" placeholder="Enter Shipment ID (e.g. 1)" required>
+                <button type="submit" class="btn btn-primary">
+                  <i data-lucide="search" class="icon-xs"></i>
+                  <span>Inspect Timeline</span>
+                </button>
+              </form>
+            </div>
+
+            <div id="telemetryDetailCard" class="telemetry-detail-card hidden">
+              <div class="meta-row">
+                <div class="detail-primary">
+                  <h3 id="trackShipmentTitle">Shipment &mdash;</h3>
+                  <span id="trackTrackingSubtitle" class="code-ref font-mono"></span>
+                </div>
+                <div id="trackStatusPill" class="badge"></div>
+              </div>
+              <div class="telemetry-stats-row">
+                <div class="tstat"><span class="tlabel">Destination:</span> <strong id="trackDestinationVal">&mdash;</strong></div>
+                <div class="tstat"><span class="tlabel">Customer:</span> <strong id="trackCustomerVal">&mdash;</strong></div>
+                <div class="tstat"><span class="tlabel">Created:</span> <strong id="trackCreatedVal">&mdash;</strong></div>
+              </div>
+            </div>
+
+            <div class="timeline-container">
+              <h4 class="timeline-heading">Chronological Event Audit Trail</h4>
+              <ol id="eventsTimelineList" class="event-timeline">
+                <li class="timeline-empty">
+                  <div class="timeline-bullet"></div>
+                  <div class="timeline-content">
+                    <strong>Awaiting Tracking Inquiry</strong>
+                    <p>Enter a shipment ID above or click "Track" from the Shipments list to review its immutable audit log.</p>
+                  </div>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 8: B2B INTEGRATION SIMULATOR -->
+        <!-- ========================================== -->
+        <section class="spa-view hidden" id="view-integrations">
+          <div class="view-panel">
+            <div class="panel-header">
+              <div>
+                <span class="panel-tag">INGESTION &bull; IDEMPOTENT REST</span>
+                <h2 class="panel-title">B2B ERP Integration Simulator</h2>
+              </div>
+            </div>
+
+            <div class="integration-notice">
+              <p><strong>Idempotent External Order Submission (<code>POST /api/v1/integrations/orders</code>)</strong>: Simulates an external ERP or Shopify warehouse sending an order with <code>X-API-KEY</code> header authentication and deduplication idempotency safety.</p>
+            </div>
+
+            <form id="integrationSimForm" class="form-grid">
+              <div class="form-group">
+                <label>External Order Reference *</label>
+                <input type="text" id="integOrderId" class="form-input" value="B2B-ERP-9941" required>
+              </div>
+              <div class="form-group">
+                <label>Customer Code *</label>
+                <input type="text" id="integCustCode" class="form-input" value="CUST-MOJIRO-EXEC" required>
+              </div>
+              <div class="form-group">
+                <label>Package Description *</label>
+                <input type="text" id="integItemDesc" class="form-input" value="Industrial Edge Computing Modules" required>
+              </div>
+              <div class="form-group">
+                <label>Package Weight (Kg) *</label>
+                <input type="number" step="0.01" id="integWeight" class="form-input" value="125.00" required>
+              </div>
+              <div class="form-group col-span-2">
+                <button type="submit" class="btn btn-primary">
+                  <i data-lucide="send" class="icon-xs"></i>
+                  <span>Transmit External Order</span>
+                </button>
+              </div>
+            </form>
+
+            <div class="output-container">
+              <h4>Server JSON Response:</h4>
+              <pre id="integrationJsonOutput" class="code-output hidden"></pre>
+            </div>
+          </div>
+        </section>
+
+      </main>
     </div>
+  </div>
 
-    <!-- Operations Panel (CRUD & Assignments) -->
-    <section id="operations-section" class="panel operations-panel">
-      <div class="panel-header">
-        <div>
-          <span class="panel-eyebrow">OPERATIONAL CONTROLS</span>
-          <h2>Actions &amp; Workflow Execution</h2>
-        </div>
-        <div class="tab-buttons">
-          <button class="tab-btn active" data-tab="tabOrder">Create Order</button>
-          <button class="tab-btn" data-tab="tabAssign">Assign Driver</button>
-          <button class="tab-btn" data-tab="tabStatus">Update Status</button>
-          <button class="tab-btn" data-tab="tabIntegration">B2B Integration</button>
-        </div>
+  <!-- ========================================== -->
+  <!-- MODALS -->
+  <!-- ========================================== -->
+
+  <!-- Modal: Dispatch New Shipment -->
+  <div id="dispatchShipmentModal" class="modal-backdrop hidden">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <h3>Dispatch New Shipment</h3>
+        <button class="modal-close" data-close="dispatchShipmentModal">&times;</button>
       </div>
-
-      <!-- Tab 1: Create Order -->
-      <div id="tabOrder" class="tab-pane active">
-        <form id="createOrderForm" class="form-grid">
+      <form id="dispatchShipmentForm" class="modal-body">
+        <div class="form-grid">
           <div class="form-group">
-            <label>Customer ID *</label>
-            <input type="number" id="orderCustomerId" class="form-input" placeholder="e.g. 1" required>
+            <label>Customer Account *</label>
+            <select id="newShipmentCustomerSelect" class="form-select" required>
+              <option value="">Loading customer accounts...</option>
+            </select>
           </div>
           <div class="form-group">
             <label>Package Description *</label>
-            <input type="text" id="pkgDescription" class="form-input" placeholder="e.g. Medical Supplies" required>
+            <input type="text" id="newShipmentPkgDesc" class="form-input" placeholder="e.g. Telecommunications Hardware" required>
           </div>
           <div class="form-group">
-            <label>Weight (Kg) *</label>
-            <input type="number" step="0.01" id="pkgWeight" class="form-input" placeholder="e.g. 12.5" required>
+            <label>Payload Weight (Kg) *</label>
+            <input type="number" step="0.01" id="newShipmentWeight" class="form-input" placeholder="e.g. 85.50" required>
           </div>
           <div class="form-group">
             <label>Declared Value (₹ / $) *</label>
-            <input type="number" step="0.01" id="pkgValue" class="form-input" placeholder="e.g. 5000" required>
+            <input type="number" step="0.01" id="newShipmentValue" class="form-input" placeholder="e.g. 45000" required>
           </div>
 
           <div class="form-group col-span-2">
-            <h4 class="form-section-title">Pickup Address</h4>
+            <h4 class="form-section-title">Delivery Destination Details</h4>
           </div>
           <div class="form-group">
-            <label>Address Line 1 *</label>
-            <input type="text" id="pickupLine1" class="form-input" placeholder="100 Logistics Hub" required>
+            <label>Street Address Line 1 *</label>
+            <input type="text" id="newDeliveryLine1" class="form-input" placeholder="Road No. 10, Banjara Hills" required>
           </div>
           <div class="form-group">
             <label>City &amp; State *</label>
             <div class="input-pair">
-              <input type="text" id="pickupCity" class="form-input" placeholder="Hyderabad" required>
-              <input type="text" id="pickupState" class="form-input" placeholder="Telangana" required>
+              <input type="text" id="newDeliveryCity" class="form-input" value="Hyderabad" required>
+              <input type="text" id="newDeliveryState" class="form-input" value="Telangana" required>
             </div>
           </div>
           <div class="form-group">
             <label>Postal Code &amp; Country *</label>
             <div class="input-pair">
-              <input type="text" id="pickupPostal" class="form-input" placeholder="500001" required>
-              <input type="text" id="pickupCountry" class="form-input" placeholder="India" required>
+              <input type="text" id="newDeliveryPostal" class="form-input" value="500034" required>
+              <input type="text" id="newDeliveryCountry" class="form-input" value="India" required>
             </div>
           </div>
-
-          <div class="form-group col-span-2">
-            <h4 class="form-section-title">Delivery Address</h4>
-          </div>
           <div class="form-group">
-            <label>Address Line 1 *</label>
-            <input type="text" id="deliveryLine1" class="form-input" placeholder="42 Commerce Blvd" required>
-          </div>
-          <div class="form-group">
-            <label>City &amp; State *</label>
+            <label>Corridor Geocodes (Latitude, Longitude)</label>
             <div class="input-pair">
-              <input type="text" id="deliveryCity" class="form-input" placeholder="Bengaluru" required>
-              <input type="text" id="deliveryState" class="form-input" placeholder="Karnataka" required>
+              <input type="number" step="0.000001" id="newDeliveryLat" class="form-input font-mono" placeholder="17.415563">
+              <input type="number" step="0.000001" id="newDeliveryLon" class="form-input font-mono" placeholder="78.435776">
             </div>
           </div>
-          <div class="form-group">
-            <label>Postal Code &amp; Country *</label>
-            <div class="input-pair">
-              <input type="text" id="deliveryPostal" class="form-input" placeholder="560100" required>
-              <input type="text" id="deliveryCountry" class="form-input" placeholder="India" required>
-            </div>
-          </div>
-
-          <div class="form-group col-span-2 form-actions">
-            <button type="submit" class="btn btn-primary">Dispatch Shipment</button>
-          </div>
-        </form>
-      </div>
-
-      <!-- Tab 2: Assign Driver -->
-      <div id="tabAssign" class="tab-pane">
-        <form id="assignDriverForm" class="form-grid">
-          <div class="form-group">
-            <label>Shipment ID *</label>
-            <input type="number" id="assignShipmentId" class="form-input" placeholder="e.g. 1" required>
-          </div>
-          <div class="form-group">
-            <label>Driver ID *</label>
-            <input type="number" id="assignDriverId" class="form-input" placeholder="e.g. 1" required>
-          </div>
-          <div class="form-group">
-            <label>Vehicle ID *</label>
-            <input type="number" id="assignVehicleId" class="form-input" placeholder="e.g. 1" required>
-          </div>
-          <div class="form-group col-span-2 form-actions">
-            <button type="submit" class="btn btn-primary">Assign Delivery Assignment</button>
-          </div>
-        </form>
-      </div>
-
-      <!-- Tab 3: Update Status -->
-      <div id="tabStatus" class="tab-pane">
-        <form id="updateStatusForm" class="form-grid">
-          <div class="form-group">
-            <label>Shipment ID *</label>
-            <input type="number" id="updateShipmentId" class="form-input" placeholder="e.g. 1" required>
-          </div>
-          <div class="form-group">
-            <label>Target Status *</label>
-            <select id="updateShipmentStatus" class="form-select" required>
-              <option value="PICKED_UP">PICKED_UP</option>
-              <option value="IN_TRANSIT">IN_TRANSIT</option>
-              <option value="AT_WAREHOUSE">AT_WAREHOUSE</option>
-              <option value="OUT_FOR_DELIVERY">OUT_FOR_DELIVERY</option>
-              <option value="DELIVERED">DELIVERED</option>
-              <option value="FAILED">FAILED</option>
-              <option value="CANCELLED">CANCELLED</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Location</label>
-            <input type="text" id="updateLocation" class="form-input" placeholder="e.g. Bengaluru Hub">
-          </div>
-          <div class="form-group">
-            <label>Description</label>
-            <input type="text" id="updateDescription" class="form-input" placeholder="e.g. Arrived at distribution center">
-          </div>
-          <div class="form-group col-span-2 form-actions">
-            <button type="submit" class="btn btn-primary">Apply State Transition</button>
-          </div>
-        </form>
-      </div>
-
-      <!-- Tab 4: B2B Integration Simulator -->
-      <div id="tabIntegration" class="tab-pane">
-        <div class="integration-notice">
-          <p><strong>Idempotent External Order Submission</strong>: Tests the <code>POST /api/v1/integrations/orders</code> endpoint protected with the external <code>X-API-KEY</code> header.</p>
         </div>
-        <form id="integrationForm" class="form-grid">
-          <div class="form-group">
-            <label>External Order ID *</label>
-            <input type="text" id="integOrderId" class="form-input" value="B2B-EXT-9901" required>
-          </div>
-          <div class="form-group">
-            <label>Customer Code *</label>
-            <input type="text" id="integCustCode" class="form-input" value="CUST-DEMO" required>
-          </div>
-          <div class="form-group col-span-2 form-actions">
-            <button type="submit" class="btn btn-primary">Send Integration Payload (X-API-KEY)</button>
-          </div>
-        </form>
-        <pre id="integrationOutput" class="code-output hidden"></pre>
-      </div>
-    </section>
-  </main>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close="dispatchShipmentModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Dispatch Shipment</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-  <!-- Login Modal -->
+  <!-- Modal: Register New Customer -->
+  <div id="newCustomerModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Register New Customer</h3>
+        <button class="modal-close" data-close="newCustomerModal">&times;</button>
+      </div>
+      <form id="newCustomerForm" class="modal-body">
+        <div class="form-group">
+          <label>Customer Identifier Code *</label>
+          <input type="text" id="newCustCode" class="form-input" placeholder="e.g. CUST-FLEXPORT-01" required>
+        </div>
+        <div class="form-group">
+          <label>Company / Organization Name *</label>
+          <input type="text" id="newCustName" class="form-input" placeholder="e.g. Flexport Global Logistics" required>
+        </div>
+        <div class="form-group">
+          <label>Corporate Email *</label>
+          <input type="email" id="newCustEmail" class="form-input" placeholder="dispatch@flexport.com" required>
+        </div>
+        <div class="form-group">
+          <label>Phone Contact *</label>
+          <input type="tel" id="newCustPhone" class="form-input" placeholder="+91 98765 01234" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close="newCustomerModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Customer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Status Lifecycle Transition -->
+  <div id="statusTransitionModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Update Shipment Lifecycle</h3>
+        <button class="modal-close" data-close="statusTransitionModal">&times;</button>
+      </div>
+      <form id="statusTransitionForm" class="modal-body">
+        <input type="hidden" id="transitionShipmentId">
+        <div class="form-group">
+          <label>Target Status *</label>
+          <select id="transitionTargetStatus" class="form-select" required>
+            <option value="ASSIGNED">ASSIGNED (Allocated to route)</option>
+            <option value="PICKED_UP">PICKED_UP (Physical logistics pickup)</option>
+            <option value="IN_TRANSIT">IN_TRANSIT (On highway / corridor)</option>
+            <option value="AT_WAREHOUSE">AT_WAREHOUSE (Sorted at regional depot)</option>
+            <option value="OUT_FOR_DELIVERY">OUT_FOR_DELIVERY (Final mile courier)</option>
+            <option value="DELIVERED">DELIVERED (Successfully received)</option>
+            <option value="FAILED">FAILED (Exception encountered)</option>
+            <option value="CANCELLED">CANCELLED (Aborted)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Checkpoint Location Landmark</label>
+          <input type="text" id="transitionLocation" class="form-input" placeholder="e.g. Hyderabad Regional Hub">
+        </div>
+        <div class="form-group">
+          <label>Audit Event Description</label>
+          <input type="text" id="transitionDescription" class="form-input" placeholder="e.g. Package arrived at distribution depot">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close="statusTransitionModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Apply Lifecycle Transition</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Register Vehicle -->
+  <div id="addVehicleModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Register New Vehicle</h3>
+        <button class="modal-close" data-close="addVehicleModal">&times;</button>
+      </div>
+      <form id="addVehicleForm" class="modal-body">
+        <div class="form-group">
+          <label>Vehicle License Plate *</label>
+          <input type="text" id="newVehiclePlate" class="form-input" placeholder="e.g. TS-09-EV-3003" required>
+        </div>
+        <div class="form-group">
+          <label>Vehicle Classification *</label>
+          <input type="text" id="newVehicleType" class="form-input" placeholder="e.g. Electric Heavy Van" required>
+        </div>
+        <div class="form-group">
+          <label>Payload Capacity (Kg) *</label>
+          <input type="number" step="0.01" id="newVehicleCapacity" class="form-input" placeholder="e.g. 1200.00" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close="addVehicleModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Vehicle</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Register Driver -->
+  <div id="addDriverModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Register New Driver</h3>
+        <button class="modal-close" data-close="addDriverModal">&times;</button>
+      </div>
+      <form id="addDriverForm" class="modal-body">
+        <div class="form-group">
+          <label>Driver Identifier Code *</label>
+          <input type="text" id="newDriverCode" class="form-input" placeholder="e.g. DRV-003" required>
+        </div>
+        <div class="form-group">
+          <label>Operator Full Name *</label>
+          <input type="text" id="newDriverName" class="form-input" placeholder="e.g. Vikram Singh" required>
+        </div>
+        <div class="form-group">
+          <label>Phone Contact *</label>
+          <input type="tel" id="newDriverPhone" class="form-input" placeholder="+91 98765 43210" required>
+        </div>
+        <div class="form-group">
+          <label>License Number *</label>
+          <input type="text" id="newDriverLicense" class="form-input" placeholder="TS-09-2024-9988" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close="addDriverModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Driver</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Printable Driver Delivery Manifest Run Sheet -->
+  <div id="driverManifestModal" class="modal-backdrop hidden">
+    <div class="modal-card modal-lg manifest-modal">
+      <div class="modal-header no-print">
+        <div class="manifest-header-left">
+          <span class="panel-tag">PRINT RUN SHEET</span>
+          <h3>Driver Dispatch Manifest</h3>
+        </div>
+        <div class="manifest-header-right">
+          <button class="btn btn-primary btn-sm" id="printManifestBtn">
+            <i data-lucide="printer" class="icon-xs"></i>
+            <span>Print / Save PDF</span>
+          </button>
+          <button class="modal-close" data-close="driverManifestModal">&times;</button>
+        </div>
+      </div>
+      
+      <!-- Printable Manifest Document -->
+      <div class="manifest-document" id="manifestPrintableArea">
+        <div class="manifest-doc-header">
+          <div class="manifest-doc-brand">
+            <h2>ShipHappens Fleet Logistics</h2>
+            <span>Autonomous Routing &bull; Central Hyderabad Hub</span>
+          </div>
+          <div class="manifest-barcode-wrap">
+            <div class="manifest-barcode" id="manifestBarcodeVisual"></div>
+            <span class="manifest-code-text font-mono" id="manifestRouteCodeText">RT-DEMO-99</span>
+          </div>
+        </div>
+
+        <div class="manifest-meta-grid">
+          <div class="mm-item">
+            <span class="mm-label">ASSIGNED VEHICLE</span>
+            <strong class="mm-val font-mono" id="manifestVehiclePlate">TS-09-EV-1001</strong>
+            <span class="mm-sub" id="manifestVehicleType">Electric Medium Van</span>
+          </div>
+          <div class="mm-item">
+            <span class="mm-label">PAYLOAD UTILIZATION</span>
+            <strong class="mm-val font-mono" id="manifestPayloadVal">980.00 / 1000.00 Kg (98.0%)</strong>
+            <span class="mm-sub">First-Fit Bin Packed</span>
+          </div>
+          <div class="mm-item">
+            <span class="mm-label">TOTAL DISTANCE</span>
+            <strong class="mm-val font-mono text-emerald" id="manifestDistanceVal">19.04 Km</strong>
+            <span class="mm-sub" id="manifestSavingsVal">2-Opt TSP Optimized</span>
+          </div>
+          <div class="mm-item">
+            <span class="mm-label">DISPATCH TIMESTAMP</span>
+            <strong class="mm-val font-mono" id="manifestDateVal">2026-09-25 13:00 UTC</strong>
+            <span class="mm-sub">Central Depot Outbound</span>
+          </div>
+        </div>
+
+        <div class="manifest-table-wrap">
+          <table class="manifest-table">
+            <thead>
+              <tr>
+                <th style="width: 45px;">Stop</th>
+                <th>Shipment / Tracking #</th>
+                <th>Destination Address</th>
+                <th style="width: 80px;">Weight</th>
+                <th style="width: 150px;">Customer Signature</th>
+              </tr>
+            </thead>
+            <tbody id="manifestStopsTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="manifest-doc-footer">
+          <div class="manifest-sign-box">
+            <span>Driver Signature: _______________________</span>
+            <span>Date: _______________</span>
+          </div>
+          <div class="manifest-sign-box">
+            <span>Dispatcher Signoff: _______________________</span>
+            <span>Hub Manager ID: #0081</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Operator Login -->
   <div id="loginModal" class="modal-backdrop hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Operator Authentication</h3>
-        <button id="closeLoginModal" class="modal-close">&times;</button>
+        <h3>Operator Sign In</h3>
+        <button class="modal-close" data-close="loginModal">&times;</button>
       </div>
       <form id="loginForm" class="modal-body">
         <div class="form-group">
-          <label>Email</label>
+          <label>Operator Email</label>
           <input type="email" id="loginEmail" class="form-input" value="demo@shiphappens.app" required>
         </div>
         <div class="form-group">
@@ -468,20 +1013,20 @@
           <input type="password" id="loginPassword" class="form-input" value="ShipHappens@2026!" required>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+          <button type="button" class="btn btn-secondary" data-close="loginModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Authenticate</button>
         </div>
       </form>
     </div>
   </div>
 
-  <footer class="app-footer">
-    <div class="footer-inner">
-      <span>ShipHappens &copy; 2026 &middot; Enterprise Logistics Execution &amp; Dispatch Monolith</span>
-      <span>Spring Boot 3.3 &middot; High Availability MySQL &middot; RESTful DTO Architecture</span>
-    </div>
-  </footer>
-
-  <script src="config.js"></script>
-  <script src="app.js"></script>
+  <!-- Libraries: Leaflet GIS, Lucide SVG Icons, React 18, ReactDOM -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <script src="config.js?v=2.0.5"></script>
+  <script src="app.js?v=2.0.5"></script>
 </body>
 </html>

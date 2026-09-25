@@ -41,6 +41,13 @@ public class DeliveryController {
         return mapper.toDeliveryResponse(service.updateDelivery(id, request));
     }
 
+    @PostMapping("/deliveries/{id}/fail")
+    public DeliveryResponse failDelivery(
+            @PathVariable Long id,
+            @Valid @RequestBody Requests.DeliveryFail request) {
+        return mapper.toDeliveryResponse(service.updateDelivery(id, new Requests.DeliveryStatus(com.shiphappens.logistics.entity.Statuses.DeliveryStatus.FAILED, request.failureReason())));
+    }
+
     @GetMapping("/deliveries")
     public List<DeliveryResponse> listDeliveries() {
         return service.listDeliveries().stream()
