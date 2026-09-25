@@ -1,17 +1,17 @@
 -- V3: Route Planning and Geographic Sequencing Schema
 ALTER TABLE vehicles
-  ADD COLUMN start_latitude DECIMAL(10,7) NULL AFTER status,
-  ADD COLUMN start_longitude DECIMAL(10,7) NULL AFTER start_latitude;
+  ADD COLUMN start_latitude DECIMAL(10,7) NULL,
+  ADD COLUMN start_longitude DECIMAL(10,7) NULL;
 
 ALTER TABLE warehouses
-  ADD COLUMN latitude DECIMAL(10,7) NULL AFTER state,
-  ADD COLUMN longitude DECIMAL(10,7) NULL AFTER latitude;
+  ADD COLUMN latitude DECIMAL(10,7) NULL,
+  ADD COLUMN longitude DECIMAL(10,7) NULL;
 
 ALTER TABLE shipments
-  ADD COLUMN weight_kg DECIMAL(12,2) NULL AFTER status,
-  ADD COLUMN destination_address VARCHAR(255) NULL AFTER weight_kg,
-  ADD COLUMN destination_latitude DECIMAL(10,7) NULL AFTER destination_address,
-  ADD COLUMN destination_longitude DECIMAL(10,7) NULL AFTER destination_latitude;
+  ADD COLUMN weight_kg DECIMAL(12,2) NULL,
+  ADD COLUMN destination_address VARCHAR(255) NULL,
+  ADD COLUMN destination_latitude DECIMAL(10,7) NULL,
+  ADD COLUMN destination_longitude DECIMAL(10,7) NULL;
 
 CREATE TABLE routes (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -49,3 +49,4 @@ CREATE TABLE route_stops (
 -- Seed default depot coordinates for demo warehouses & vehicles
 UPDATE warehouses SET latitude = 17.385044, longitude = 78.486671 WHERE latitude IS NULL;
 UPDATE vehicles SET start_latitude = 17.385044, start_longitude = 78.486671 WHERE start_latitude IS NULL;
+
